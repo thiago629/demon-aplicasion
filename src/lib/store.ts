@@ -4,7 +4,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import type {
-  Debate, Duelo, Prediccion, Consentimiento, DatosPersonales, Denuncia, Grupo, Medio, MotivoDenuncia, Notificacion, Perfil, Post,
+  Chat, Debate, Duelo, Prediccion, Seguridad, Consentimiento, DatosPersonales, Denuncia, Grupo, Medio, MotivoDenuncia, Notificacion, Perfil, Post,
 } from './types';
 import { edad, mencionesDe } from './texto';
 import { semilla } from './semilla';
@@ -37,9 +37,12 @@ export type Estado = {
   capsulaVotos: { postId: string; userId: string; acierto: boolean }[];
   diasActivos: Record<string, string[]>; // AAAA-MM-DD en que cada persona publicó o comentó
   predicciones: Prediccion[];
+  chats: Chat[];
+  seguridad: Record<string, Seguridad>;
+  asistente: Record<string, { rol: 'yo' | 'aura'; texto: string; creado: string }[]>;
 };
 
-const CLAVE = 'demo.app.v4';
+const CLAVE = 'lunaure.app.v1';
 let estado: Estado = semilla();
 const oyentes = new Set<() => void>();
 
@@ -53,7 +56,7 @@ export async function cargar() {
   try {
     const raw = await AsyncStorage.getItem(CLAVE);
     if (raw) {
-      estado = JSON.parse(raw);
+      estado = { ...semilla(), ...JSON.parse(raw) };
       oyentes.forEach((o) => o());
     }
   } catch {}
@@ -105,7 +108,7 @@ export function registrar(r: Registro): string | null {
     sesion: uid,
     perfiles: {
       ...e.perfiles,
-      [uid]: { id: uid, usuario, nombre: r.nombre.trim(), bio: '', avatarColor: '#8A9099', privado: menor, creado: ahora() },
+      [uid]: { id: uid, usuario, nombre: r.nombre.trim(), bio: '', avatarColor: 'oro', privado: menor, creado: ahora() },
     },
     privado: {
       datos: { ...e.privado.datos, [uid]: { userId: uid, email: r.email.trim().toLowerCase(), fechaNacimiento: r.fechaNacimiento, pais: 'ES' } },
@@ -540,4 +543,121 @@ export function rankingPuntos(e: Estado) {
   return Object.keys(e.perfiles).map((userId) => ({ userId, puntos: puntos(e, userId) }))
     .filter((r) => r.puntos !== PUNTOS_INICIALES || e.predicciones.some((p) => p.apuestas.some((a) => a.userId === r.userId)))
     .sort((a, b) => b.puntos - a.puntos);
+}
+
+// ---------------------------------------------------------------- Mensajes privados con racha
+// Racha de chat: en un directo cuenta el día si escriben las dos personas;
+// en un grupo, si participa al menos la mitad (y como mínimo 3 personas).
+const diaDe = (iso: string) => hoyISO(new Date(iso));
+
+export function diasQueCuentan(c: Chat): Set<string> {
+  const porDia = new Map<string, Set<string>>();
+  for (const m of c.mensajes) { const d = diaDe(m.creado); if (!porDia.has(d)) porDia.set(d, new Set()); porDia.get(d)!.add(m.autor); }
+  const necesarios = c.tipo === 'directo' ? 2 : Math.max(3, Math.ceil(c.miembros.length / 2));
+  return new Set([...porDia].filter(([, quien]) => quien.size >= necesarios).map(([d]) => d));
+}
+
+export function rachaChat(c: Chat): { dias: number; hoy: boolean; enPeligro: boolean } {
+  const dias = diasQueCuentan(c);
+  const hoy = hoyISO();
+  let d = dias.has(hoy) ? hoy : diaAntes(hoy), n = 0;
+  while (dias.has(d)) { n++; d = diaAntes(d); }
+  return { dias: n, hoy: dias.has(hoy), enPeligro: n > 0 && !dias.has(hoy) };
+}
+
+export const chatsDe = (e: Estado, uid: string) =>
+  e.chats.filter((c) => c.miembros.includes(uid))
+    .sort((a, b) => Date.parse(b.mensajes.at(-1)?.creado ?? b.creado) - Date.parse(a.mensajes.at(-1)?.creado ?? a.creado));
+
+export function enviarMensaje(chatId: string, texto: string, rachi = false, autor = estado.sesion) {
+  if (!autor || (!texto.trim() && !rachi)) return;
+  const m = { id: id(), autor, texto: texto.trim() || undefined, rachi: rachi || undefined, creado: ahora() };
+  cambiar((e) => ({ ...e, chats: e.chats.map((c) => c.id === chatId ? { ...c, mensajes: [...c.mensajes, m] } : c) }));
+}
+
+export function abrirChatCon(userId: string): string | null {
+  const yo = estado.sesion; if (!yo || yo === userId) return null;
+  const existe = estado.chats.find((c) => c.tipo === 'directo' && c.miembros.includes(yo) && c.miembros.includes(userId));
+  if (existe) return existe.id;
+  const c: Chat = { id: id(), tipo: 'directo', miembros: [yo, userId], mensajes: [], creado: ahora() };
+  cambiar((e) => ({ ...e, chats: [c, ...e.chats] }));
+  return c.id;
+}
+
+export function crearChatGrupo(nombre: string, miembros: string[]): string | null {
+  const yo = estado.sesion; if (!yo || !nombre.trim() || miembros.length < 2) return null;
+  const c: Chat = { id: id(), tipo: 'grupo', nombre: nombre.trim(), miembros: [yo, ...miembros.filter((m) => m !== yo)], mensajes: [], creado: ahora() };
+  cambiar((e) => ({ ...e, chats: [c, ...e.chats] }));
+  return c.id;
+}
+
+// Chats de bienvenida para una cuenta nueva (modo demostración): historial de días anteriores
+export function prepararChats(uid: string) {
+  if (estado.chats.some((c) => c.miembros.includes(uid))) return;
+  const otros = ['u_lucia', 'u_sofia', 'u_dani', 'u_marcos', 'u_ana'].filter((x) => x !== uid);
+  const hace = (dias: number, hora: number) => { const d = new Date(); d.setDate(d.getDate() - dias); d.setHours(hora, Math.floor(Math.random() * 50), 0, 0); return d.toISOString(); };
+  const m = (autor: string, texto: string, dias: number, hora: number, rachi = false) => ({ id: id(), autor, texto: texto || undefined, rachi: rachi || undefined, creado: hace(dias, hora) });
+  const [a, b, c2, d] = otros;
+  const chats: Chat[] = [
+    { id: id(), tipo: 'directo', miembros: [uid, a], creado: hace(9, 10), mensajes: [
+      ...[6, 5, 4, 3, 2, 1].flatMap((n) => [m(a, '', n, 11, true), m(uid, '', n, 12, true)]),
+      m(a, '¿Has visto el atardecer que ha subido Sofía? Quiero ir a ese sitio.', 1, 20),
+      m(uid, 'Sí, brutal. Hay que organizar escapada.', 1, 21),
+      m(a, 'Te mando Rachi, que no se nos congele la racha 🔥', 0, 9, false),
+      m(a, '', 0, 9, true),
+    ] },
+    { id: id(), tipo: 'directo', miembros: [uid, b], creado: hace(4, 10), mensajes: [
+      m(b, 'Oye, ¿te apuntas a la predicción del clásico?', 2, 18),
+      m(uid, 'Ya he puesto 100 puntos al empate 😅', 2, 18),
+      m(b, 'Valiente. Yo voy con el local.', 2, 19),
+    ] },
+    { id: id(), tipo: 'grupo', nombre: 'Los de siempre ✨', miembros: [uid, a, c2, d], creado: hace(12, 10), mensajes: [
+      ...[3, 2, 1].flatMap((n) => [m(a, 'Buenos días, grupo', n, 9), m(c2, '', n, 10, true), m(uid, '¡Buenas!', n, 11)]),
+      m(d, '¿Cena el sábado? Propongo el sitio del perfume dorado de la foto 😂', 0, 10),
+      m(c2, 'Yo me apunto', 0, 10),
+    ] },
+  ];
+  cambiar((e) => ({ ...e, chats: [...chats, ...e.chats] }));
+}
+
+// ---------------------------------------------------------------- Seguridad
+export const seguridadBase = (): Seguridad => ({
+  dosPasos: false, llaveAcceso: false, alertasInicio: true,
+  sesiones: [
+    { id: 's1', dispositivo: 'Este dispositivo', lugar: 'España', ultima: ahora(), actual: true },
+    { id: 's2', dispositivo: 'iPhone 15', lugar: 'Madrid, España', ultima: new Date(Date.now() - 36e5 * 20).toISOString() },
+    { id: 's3', dispositivo: 'Chrome en Windows', lugar: 'Valencia, España', ultima: new Date(Date.now() - 864e5 * 6).toISOString() },
+  ],
+  actividad: [
+    { id: 'a1', evento: 'Inicio de sesión en este dispositivo', fecha: ahora() },
+    { id: 'a2', evento: 'Inicio de sesión en iPhone 15', fecha: new Date(Date.now() - 36e5 * 20).toISOString() },
+  ],
+});
+
+// La base se guarda por usuario para que el selector devuelva siempre el mismo objeto (evita bucles de render)
+const BASES_SEGURIDAD: Record<string, Seguridad> = {};
+export const seguridadDe = (e: Estado, uid: string) => e.seguridad[uid] ?? (BASES_SEGURIDAD[uid] ??= seguridadBase());
+
+export function cambiarSeguridad(c: Partial<Pick<Seguridad, 'dosPasos' | 'llaveAcceso' | 'alertasInicio'>>) {
+  const yo = estado.sesion; if (!yo) return;
+  const evento = c.dosPasos !== undefined ? `Verificación en dos pasos ${c.dosPasos ? 'activada' : 'desactivada'}`
+    : c.llaveAcceso !== undefined ? `Llave de acceso ${c.llaveAcceso ? 'creada' : 'eliminada'}`
+    : `Alertas de inicio de sesión ${c.alertasInicio ? 'activadas' : 'desactivadas'}`;
+  cambiar((e) => { const s = seguridadDe(e, yo); return { ...e, seguridad: { ...e.seguridad, [yo]: { ...s, ...c, actividad: [{ id: id(), evento, fecha: ahora() }, ...s.actividad] } } }; });
+}
+
+export function cerrarSesionRemota(sesionId: string) {
+  const yo = estado.sesion; if (!yo) return;
+  cambiar((e) => { const s = seguridadDe(e, yo); const x = s.sesiones.find((z) => z.id === sesionId);
+    return { ...e, seguridad: { ...e.seguridad, [yo]: { ...s, sesiones: s.sesiones.filter((z) => z.id !== sesionId), actividad: [{ id: id(), evento: `Sesión cerrada en ${x?.dispositivo ?? 'otro dispositivo'}`, fecha: ahora() }, ...s.actividad] } } }; });
+}
+
+export function puntuacionSeguridad(s: Seguridad): number {
+  return 40 + (s.dosPasos ? 30 : 0) + (s.llaveAcceso ? 20 : 0) + (s.alertasInicio ? 10 : 0);
+}
+
+// ---------------------------------------------------------------- Asistente Aura
+export function hablarConAura(rol: 'yo' | 'aura', texto: string) {
+  const yo = estado.sesion; if (!yo) return;
+  cambiar((e) => ({ ...e, asistente: { ...e.asistente, [yo]: [...(e.asistente[yo] ?? []), { rol, texto, creado: ahora() }] } }));
 }

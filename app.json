@@ -1,28 +1,30 @@
 {
   "expo": {
-    "name": "Demo",
-    "slug": "demo-francisco",
-    "scheme": "demofrancisco",
+    "name": "Lunaure",
+    "slug": "lunaure",
+    "scheme": "lunaure",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "splash": {
-      "backgroundColor": "#0B0B0D"
+      "backgroundColor": "#0A0908",
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.example.demofrancisco",
+      "bundleIdentifier": "com.lunaure.app",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Zavnir necesita acceso a tus fotos para que puedas publicarlas.",
-        "NSCameraUsageDescription": "Zavnir usa la cámara para que hagas fotos y vídeos y los publiques.",
-        "NSMicrophoneUsageDescription": "Zavnir usa el micrófono para grabar el sonido de tus vídeos."
+        "NSPhotoLibraryUsageDescription": "Lunaure necesita acceso a tus fotos para que puedas publicarlas.",
+        "NSCameraUsageDescription": "Lunaure usa la cámara para que hagas fotos y vídeos y los publiques.",
+        "NSMicrophoneUsageDescription": "Lunaure usa el micrófono para grabar el sonido de tus vídeos."
       }
     },
     "android": {
-      "package": "com.example.demofrancisco",
+      "package": "com.lunaure.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0B0B0D",
+        "backgroundColor": "#0A0908",
         "foregroundImage": "./assets/android-icon-foreground.png"
       }
     },
@@ -38,7 +40,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Zavnir necesita acceso a tus fotos para que puedas publicarlas."
+          "photosPermission": "Lunaure necesita acceso a tus fotos para que puedas publicarlas."
         }
       ]
     ],

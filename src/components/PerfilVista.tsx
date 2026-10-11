@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { useTheme } from '../lib/theme';
-import { bloquear, seguir, silenciar, useEstado, visibles, puntosVisionario } from '../lib/store';
-import { Avatar, Boton, Cabecera, Icono, Pestañas, Vacio } from './ui';
+import { fuentes, useTheme } from '../lib/theme';
+import { abrirChatCon, bloquear, seguir, silenciar, useEstado, visibles, puntosVisionario } from '../lib/store';
+import { Avatar, Boton, Degradado, Cabecera, Icono, Pestañas, Vacio } from './ui';
 import { ListaPosts } from './Lista';
 import { HojaDenuncia, Opcion } from './Post';
 import { Modal } from 'react-native';
+
+const PORTADAS = [require('../../assets/lux/ciudad.jpg'), require('../../assets/lux/atardecer.jpg'), require('../../assets/lux/cafe.jpg')];
 
 export function PerfilVista({ usuario, conAtras }: { usuario: string; conAtras?: boolean }) {
   const t = useTheme();
@@ -35,7 +37,10 @@ export function PerfilVista({ usuario, conAtras }: { usuario: string; conAtras?:
 
   const cabecera = (
     <View>
-      <View style={{ height: 110, backgroundColor: p.avatarColor, opacity: 0.85 }} />
+      <View style={{ height: 130 }}>
+        <Image source={PORTADAS[[...p.id].reduce((a, c) => a + c.charCodeAt(0), 0) % PORTADAS.length]} style={{ width: '100%', height: 130 }} resizeMode="cover" accessibilityLabel="" />
+        <Degradado color={t.bg} alto={70} />
+      </View>
       <View style={{ paddingHorizontal: 16, marginTop: -36, gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
           <View style={{ borderWidth: 4, borderColor: t.bg, borderRadius: 50 }}><Avatar nombre={p.nombre} color={p.avatarColor} size={76} /></View>
@@ -43,12 +48,13 @@ export function PerfilVista({ usuario, conAtras }: { usuario: string; conAtras?:
             : bloqueado ? <Boton titulo="Desbloquear" tipo="peligro" onPress={() => bloquear(p.id)} estilo={{ paddingVertical: 8 }} />
             : <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
                 <Pressable onPress={() => setMenu(true)} accessibilityLabel="Más opciones" style={{ borderWidth: 1, borderColor: t.line, borderRadius: 999, padding: 8 }}><Icono n="mas" size={18} /></Pressable>
+                <Pressable onPress={() => { const c = abrirChatCon(p.id); if (c) router.push(`/chat/${c}`); }} accessibilityRole="button" accessibilityLabel={`Enviar mensaje a ${p.nombre}`} style={{ borderWidth: 1, borderColor: t.line, borderRadius: 999, padding: 8 }}><Icono n="burbuja" size={18} /></Pressable>
                 <Boton titulo={sigo ? 'Siguiendo' : 'Seguir'} tipo={sigo ? 'secundario' : 'primario'} onPress={() => seguir(p.id)} estilo={{ paddingVertical: 8 }} />
               </View>}
         </View>
         <View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Text style={{ color: t.text, fontSize: 22, fontWeight: '800' }}>{p.nombre}</Text>
+            <Text style={{ color: t.text, fontSize: 30, fontFamily: fuentes.displayBold }}>{p.nombre}</Text>
             {p.verificado && <Icono n="check" size={16} color={t.accent} />}
             {p.privado && <Icono n="candado" size={15} color={t.muted} />}
           </View>

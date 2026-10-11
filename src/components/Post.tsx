@@ -172,7 +172,7 @@ export function Post({ post, detalle }: { post: TPost; detalle?: boolean }) {
         )}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12, maxWidth: 360 }}>
           <Accion icono="respuesta" n={respuestas} color={t.accent} etiqueta="Responder" onPress={() => router.push({ pathname: '/publicar', params: { respuestaA: post.id } })} />
-          <Accion icono="compartir" n={rts} activo={rtYo} color="#4A8C6F" etiqueta="Compartir" onPress={() => compartir(post.id)} />
+          <Accion icono="compartir" n={rts} activo={rtYo} color={t.ok} etiqueta="Compartir" onPress={() => compartir(post.id)} />
           <Accion icono="corazon" n={likes} activo={meGustaYo} color={t.danger} etiqueta="Me gusta" onPress={() => meGusta(post.id)} />
           <Accion icono="guardar" activo={guardado} color={t.accent} etiqueta="Guardar" onPress={() => guardar(post.id)} />
         </View>

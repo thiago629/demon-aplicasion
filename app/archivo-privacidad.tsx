@@ -3,7 +3,7 @@
 // y cada consulta queda apuntada en "auditoria". Aquí se muestran enmascarados.
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { useTheme } from '../src/lib/theme';
+import { fuentes, useTheme } from '../src/lib/theme';
 import { useEstado } from '../src/lib/store';
 import { Cabecera, Icono } from '../src/components/ui';
 
@@ -11,6 +11,9 @@ const TRATAMIENTOS = [
   ['Cuentas de usuario', 'Email, fecha de nacimiento, país', 'Contrato (art. 6.1.b RGPD)', 'Mientras exista la cuenta + 30 días'],
   ['Consentimientos', 'Qué aceptó, versión y fecha', 'Obligación legal (art. 7.1 RGPD)', '5 años tras borrar la cuenta'],
   ['Moderación y denuncias', 'Denuncias, decisiones y recursos', 'Obligación legal (DSA)', '6 meses tras cerrarse'],
+  ['Mensajes privados y rachas', 'Texto de los chats, miembros, días de racha', 'Contrato (art. 6.1.b RGPD)', 'Hasta que los borres o cierres la cuenta'],
+  ['Asistente Aura (IA)', 'Preguntas que haces al asistente', 'Contrato (art. 6.1.b RGPD); aviso de IA (art. 50 AI Act)', '30 días; el proveedor de IA no entrena con ellos'],
+  ['Seguridad de la cuenta', 'Dispositivos, inicios de sesión, IP aproximada', 'Interés legítimo (art. 6.1.f RGPD)', '12 meses'],
   ['Medición de uso', 'Uso anónimo de la app', 'Consentimiento (art. 6.1.a RGPD)', '13 meses'],
 ];
 
@@ -33,7 +36,7 @@ export default function ArchivoPrivacidad() {
           </Text>
         </View>
 
-        <Text style={{ color: t.text, fontSize: 18, fontWeight: '800' }}>Registro de actividades de tratamiento</Text>
+        <Text style={{ color: t.text, fontSize: 24, fontFamily: fuentes.display }}>Registro de actividades de tratamiento</Text>
         {TRATAMIENTOS.map(([que, datos, base, plazo]) => (
           <View key={que} style={{ gap: 2, paddingBottom: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: t.line }}>
             <Text style={{ color: t.text, fontWeight: '700' }}>{que}</Text>
@@ -43,7 +46,7 @@ export default function ArchivoPrivacidad() {
           </View>
         ))}
 
-        <Text style={{ color: t.text, fontSize: 18, fontWeight: '800' }}>Personas registradas ({filas.length})</Text>
+        <Text style={{ color: t.text, fontSize: 24, fontFamily: fuentes.display }}>Personas registradas ({filas.length})</Text>
         {filas.map((d) => {
           const p = e.perfiles[d.userId];
           const c = e.privado.consentimientos[d.userId] ?? [];
@@ -58,7 +61,7 @@ export default function ArchivoPrivacidad() {
           );
         })}
 
-        <Text style={{ color: t.text, fontSize: 18, fontWeight: '800' }}>Denuncias y recursos</Text>
+        <Text style={{ color: t.text, fontSize: 24, fontFamily: fuentes.display }}>Denuncias y recursos</Text>
         <Text style={celda}>{e.denuncias.length} denuncias · {e.apelaciones.length} recursos de moderación registrados.</Text>
         <Text style={{ color: t.muted, fontSize: 12 }}>App de prueba: los datos son inventados y solo se guardan en este dispositivo.</Text>
       </ScrollView>

@@ -21,15 +21,16 @@ export default function Pestanas() {
     <Tabs screenOptions={{
       headerShown: false, tabBarShowLabel: false,
       tabBarActiveTintColor: t.accent, tabBarInactiveTintColor: t.muted,
-      tabBarStyle: { backgroundColor: t.bg, borderTopColor: t.line },
+      tabBarStyle: { backgroundColor: t.bg, borderTopColor: t.line, height: 64, paddingTop: 6 },
       sceneStyle: { backgroundColor: t.bg },
     }}>
-      <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarIcon: icono('casa') }} />
-      <Tabs.Screen name="explorar" options={{ title: 'Explorar', tabBarIcon: icono('lupa') }} />
- <Tabs.Screen name="arena" options={{ title: 'Arena', tabBarIcon: icono('trofeo') }} />
-      <Tabs.Screen name="grupos" options={{ title: 'Grupos', tabBarIcon: icono('grupo') }} />
-      <Tabs.Screen name="notificaciones" options={{ title: 'Notificaciones', tabBarIcon: icono('campana', sinLeer) }} />
-      <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarIcon: icono('persona') }} />
+      <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarAccessibilityLabel: 'Inicio', tabBarIcon: icono('casa') }} />
+      <Tabs.Screen name="explorar" options={{ title: 'Explorar', tabBarAccessibilityLabel: 'Explorar', tabBarIcon: icono('lupa') }} />
+      <Tabs.Screen name="arena" options={{ title: 'Arena', tabBarAccessibilityLabel: 'Arena', tabBarIcon: icono('trofeo') }} />
+      <Tabs.Screen name="mensajes" options={{ title: 'Mensajes', tabBarAccessibilityLabel: 'Mensajes', tabBarIcon: icono('burbuja') }} />
+      <Tabs.Screen name="notificaciones" options={{ title: 'Avisos', tabBarAccessibilityLabel: 'Avisos', tabBarIcon: icono('campana', sinLeer) }} />
+      <Tabs.Screen name="grupos" options={{ title: 'Comunidades', href: null }} />
+      <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarAccessibilityLabel: 'Perfil', tabBarIcon: icono('persona') }} />
     </Tabs>
   );
 }

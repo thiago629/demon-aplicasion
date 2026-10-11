@@ -9,7 +9,7 @@ import { Avatar, Boton, Campo, Icono } from '../src/components/ui';
 import { MedioVista } from '../src/components/Post';
 
 const MAX = 500;
-const PLANTILLA_MEME = require('../assets/demo/meme-sorpresa.jpg');
+const PLANTILLA_MEME = require('../assets/lux/meme.jpg');
 
 export default function Publicar() {
   const t = useTheme();

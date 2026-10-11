@@ -4,8 +4,9 @@ import { Stack, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { cargar, decidirCookies, useEstado } from '../src/lib/store';
-import { useTheme } from '../src/lib/theme';
+import { fuentes, useTheme } from '../src/lib/theme';
 import { Boton } from '../src/components/ui';
+import { useFonts, CormorantGaramond_500Medium_Italic, CormorantGaramond_600SemiBold, CormorantGaramond_700Bold } from '@expo-google-fonts/cormorant-garamond';
 
 // Pantallas que se ven sin iniciar sesión
 const PUBLICAS = ['bienvenida', 'registro', 'entrar', 'legal', 'eliminar-cuenta'];
@@ -16,8 +17,8 @@ function AvisoCookies() {
   if (decidido) return null;
   // Aceptar y Rechazar con el mismo peso visual (requisito AEPD)
   return (
-    <View style={{ position: 'absolute', left: 12, right: 12, bottom: 24, backgroundColor: t.card, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: t.line, maxWidth: 560, alignSelf: 'center' }}>
-      <Text style={{ color: t.text, fontWeight: '700', fontSize: 16 }}>Tu privacidad</Text>
+    <View style={{ position: 'absolute', left: 12, right: 12, bottom: 24, backgroundColor: t.card, borderRadius: 20, padding: 18, gap: 12, borderWidth: 1, borderColor: t.accent, maxWidth: 560, alignSelf: 'center' }}>
+      <Text style={{ color: t.text, fontFamily: fuentes.display, fontSize: 22 }}>Tu privacidad</Text>
       <Text style={{ color: t.muted, fontSize: 14 }}>
         Usamos lo imprescindible para que la app funcione. Con tu permiso, también medimos de forma anónima cómo se usa para mejorarla.{' '}
         <Text style={{ color: t.accent }} onPress={() => router.push('/legal/cookies')}>Más información</Text>
@@ -32,11 +33,14 @@ function AvisoCookies() {
 
 export default function Raiz() {
   const t = useTheme();
-  const [listo, setListo] = useState(false);
+  const [cargado, setCargado] = useState(false);
+  const [fuentesOk, errorFuentes] = useFonts({ CormorantGaramond_500Medium_Italic, CormorantGaramond_600SemiBold, CormorantGaramond_700Bold });
+  // Si las fuentes fallan, la app sigue con la del sistema
+  const listo = cargado && (fuentesOk || !!errorFuentes);
   const sesion = useEstado((e) => e.sesion);
   const segmentos = useSegments();
 
-  useEffect(() => { cargar().finally(() => setListo(true)); }, []);
+  useEffect(() => { cargar().finally(() => setCargado(true)); }, []);
 
   useEffect(() => {
     if (!listo) return;
@@ -47,7 +51,7 @@ export default function Raiz() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <SafeAreaView style={{ flex: 1, backgroundColor: t.bg }} edges={['top']}>
         <View style={{ flex: 1, width: '100%', maxWidth: Platform.OS === 'web' ? 640 : undefined, alignSelf: 'center', borderLeftWidth: Platform.OS === 'web' ? 1 : 0, borderRightWidth: Platform.OS === 'web' ? 1 : 0, borderColor: t.line }}>
           {listo ? (

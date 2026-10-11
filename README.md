@@ -1,10 +1,17 @@
-# App de Francisco (red social tipo X/Twitter)
+# Lunaure · Brilla con luz propia
+
+Red social de lujo (tipo X/Twitter) para Francisco. Negro obsidiana, oro y marfil; logo de media luna dorada en 3D.
 
 App para iPhone, Android y web hecha con **Expo (React Native) + Expo Router + TypeScript**. Base de datos prevista: **Supabase** (PostgreSQL alojado en la UE).
 
 El nombre y el eslogan están en `src/lib/marca.json`; cambiarlos ahí cambia toda la app y los textos legales.
 
 ## Qué hace ya
+
+- **Mensajes**: chats directos y de grupo con **racha** (🔥 si escribís los dos cada día; en grupos, la mitad o mínimo 3). «Enviar a Rachi» salva la racha.
+- **Aura**: asistente de IA con aviso de que es una IA (AI Act). En la demo responde con textos fijos; en producción usa Claude a través de `supabase/functions/aura` (la clave nunca va en la app).
+- **Seguridad**: puntuación de la cuenta, verificación en dos pasos, llave de acceso, alertas de inicio y cierre de sesión en otros dispositivos. Ver `docs/seguridad.md`.
+- **Arena**: duelos de memes y predicciones con puntos (sin valor económico). **Cápsulas** del tiempo y **Ring**.
 
 - Registro con fecha de nacimiento (mínimo 16 años) y aceptación de Términos y Privacidad. Cada aceptación se guarda con la versión del documento y la fecha.
 - Las cuentas de 16 y 17 años son privadas por defecto.
@@ -49,7 +56,7 @@ Ahora mismo funciona en **modo demostración**: los datos viven en el propio dis
 ## Pasos para lanzarla de verdad
 
 1. Crear un proyecto en Supabase en región **UE (Frankfurt o París)** a nombre de la empresa de Francisco, y firmar su DPA (contrato de encargado del tratamiento).
-2. Ejecutar `supabase/migrations/0001_inicial.sql` y activar la tarea diaria `privado.purgar_cuentas()` con pg_cron.
+2. Ejecutar `supabase/migrations/0001_inicial.sql` y `0002_chats_asistente_seguridad.sql` y activar la tarea diaria `privado.purgar_cuentas()` con pg_cron.
 3. Poner `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_ANON_KEY` en `.env` y cambiar las funciones de `src/lib/store.ts` por llamadas a Supabase (mismas tablas y nombres).
 4. Contraseñas: las gestiona Supabase Auth (bcrypt). Si se añade acceso con Google, añadir también «Iniciar sesión con Apple» (lo exige Apple).
 5. Quitar metadatos de fotos y vídeos también en el servidor (Edge Function al subir al bucket `medios`).

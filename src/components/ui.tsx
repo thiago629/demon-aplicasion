@@ -1,16 +1,21 @@
 import { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import { useTheme } from '../lib/theme';
+import { Image, Pressable, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import { fuentes, useTheme } from '../lib/theme';
 
 // ---------------------------------------------------------------- Logo
-// Rombo de Zavnir: Λ (hablar) arriba en plata y V (escuchar) abajo
+// Media luna de Lunaure («luna de oro»): círculo menos un círculo desplazado
 export function Simbolo({ size = 40 }: { size?: number }) {
-  const t = useTheme();
   return (
-    <Svg width={size} height={size * (576 / 536)} viewBox="244 224 536 576">
-      <Path d="M512 224 L780 492 H668 L512 336 L356 492 H244 Z" fill={t.accent} />
-      <Path d="M512 800 L780 532 H668 L512 688 L356 532 H244 Z" fill={t.text} />
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Defs>
+        <LinearGradient id="oroLuna" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#F6E2AE" />
+          <Stop offset="0.5" stopColor="#D4AF6A" />
+          <Stop offset="1" stopColor="#9C7836" />
+        </LinearGradient>
+      </Defs>
+      <Path d="M73.47 12.78 A44 44 0 1 0 73.47 87.22 A37.4 37.4 0 1 1 73.47 12.78 Z" fill="url(#oroLuna)" />
     </Svg>
   );
 }
@@ -39,6 +44,13 @@ const RUTAS: Record<string, string> = {
   trofeo: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4',
   rayo: 'M13 2L4 14h7l-1 8 9-12h-7z',
   reloj: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2',
+  burbuja: 'M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z',
+  enviar: 'M3 11l18-8-8 18-2-8z',
+  escudo: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4',
+  chispa: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z',
+  llave: 'M15 7a4 4 0 1 1-3.9 5H3v3h3v3h3v-3h2.1A4 4 0 0 1 15 7zM16 11h.01',
+  movil: 'M7 2h10v20H7zM11 18h2',
+  puntos: 'M12 5h.01M12 12h.01M12 19h.01',
 };
 
 export function Icono({ n, size = 22, color, fill }: { n: keyof typeof RUTAS | string; size?: number; color?: string; fill?: string }) {
@@ -51,10 +63,32 @@ export function Icono({ n, size = 22, color, fill }: { n: keyof typeof RUTAS | s
 }
 
 // ---------------------------------------------------------------- Avatar
+// Cada persona tiene una gema 3D según su color; encima va su inicial
+const GEMAS = {
+  oro: require('../../assets/lux/gemas/oro.png'),
+  orosa: require('../../assets/lux/gemas/orosa.png'),
+  perla: require('../../assets/lux/gemas/perla.png'),
+  onix: require('../../assets/lux/gemas/onix.png'),
+  esmeralda: require('../../assets/lux/gemas/esmeralda.png'),
+  zafiro: require('../../assets/lux/gemas/zafiro.png'),
+  rubi: require('../../assets/lux/gemas/rubi.png'),
+  amatista: require('../../assets/lux/gemas/amatista.png'),
+};
+export type Gema = keyof typeof GEMAS;
+export const LISTA_GEMAS = Object.keys(GEMAS) as Gema[];
+export function gemaDe(color: string): Gema {
+  if (color in GEMAS) return color as Gema;
+  let h = 0; for (const c of color) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return LISTA_GEMAS[h % LISTA_GEMAS.length];
+}
+
 export function Avatar({ nombre, color, size = 44 }: { nombre: string; color: string; size?: number }) {
+  const g = gemaDe(color);
+  const claro = g === 'perla' || g === 'oro';
   return (
-    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ color: '#F6F3EC', fontWeight: '700', fontSize: size * 0.42 }}>{nombre.trim()[0]?.toUpperCase() ?? '?'}</Text>
+    <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0d0c0a', borderWidth: 1, borderColor: 'rgba(212,175,106,0.35)' }}>
+      <Image source={GEMAS[g]} style={{ position: 'absolute', width: size, height: size }} accessibilityIgnoresInvertColors />
+      <Text style={{ color: claro ? '#2a2216' : '#FFF8EC', fontFamily: fuentes.displayBold, fontSize: size * 0.5, textShadowColor: claro ? 'transparent' : 'rgba(0,0,0,0.6)', textShadowRadius: 4 }}>{nombre.trim()[0]?.toUpperCase() ?? '?'}</Text>
     </View>
   );
 }
@@ -73,11 +107,11 @@ export function Boton({ titulo, onPress, tipo = 'primario', desactivado, estilo 
       onPress={onPress}
       style={({ pressed }) => [{
         backgroundColor: bg, borderColor: tipo === 'primario' ? bg : tipo === 'peligro' ? t.danger : t.line,
-        borderWidth: 1, borderRadius: 999, paddingVertical: 12, paddingHorizontal: 20, alignItems: 'center',
+        borderWidth: 1, borderRadius: 999, paddingVertical: 13, paddingHorizontal: 20, alignItems: 'center',
         opacity: desactivado ? 0.4 : pressed ? 0.8 : 1,
       }, estilo]}
     >
-      <Text style={{ color: fg, fontWeight: '700', fontSize: 15 }}>{titulo}</Text>
+      <Text style={{ color: fg, fontWeight: '700', fontSize: 15, letterSpacing: 0.4 }}>{titulo}</Text>
     </Pressable>
   );
 }
@@ -133,8 +167,22 @@ export function Cabecera({ titulo, izquierda, derecha }: { titulo: string; izqui
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, gap: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: t.line, backgroundColor: t.bg }}>
       {izquierda}
-      <Text style={{ flex: 1, color: t.text, fontSize: 20, fontWeight: '800' }}>{titulo}</Text>
+      <Text style={{ flex: 1, color: t.text, fontSize: 26, fontFamily: fuentes.display, letterSpacing: 0.3 }} numberOfLines={1}>{titulo}</Text>
       {derecha}
+    </View>
+  );
+}
+
+// Degradado vertical de transparente al color dado (para leer texto sobre fotos)
+export function Degradado({ color, alto = 220 }: { color: string; alto?: number }) {
+  return (
+    <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: alto }}>
+      <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 10 10">
+        <Defs><LinearGradient id="dg" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={color} stopOpacity={0} /><Stop offset="1" stopColor={color} stopOpacity={1} />
+        </LinearGradient></Defs>
+        <Rect x="0" y="0" width="10" height="10" fill="url(#dg)" />
+      </Svg>
     </View>
   );
 }

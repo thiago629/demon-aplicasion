@@ -41,6 +41,21 @@ export default function Ajustes() {
           <Boton titulo="Guardar" tipo="secundario" onPress={() => actualizarPerfil({ nombre: nombre.trim() || yo.nombre, bio })} />
         </Seccion>
 
+        <Seccion titulo="Cuenta y seguridad">
+          {([['escudo', 'Seguridad', 'Verificación en dos pasos, llave de acceso y dispositivos', '/seguridad'],
+            ['chispa', 'Asistente Aura', 'Resuelve dudas sobre la app y tu privacidad', '/asistente'],
+            ['candado', 'Archivo de privacidad', 'Qué datos guardamos, dónde y para qué', '/archivo-privacidad']] as const).map(([ic, titulo, desc, ruta]) => (
+            <Pressable key={ruta} onPress={() => router.push(ruta)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: t.chip, alignItems: 'center', justifyContent: 'center' }}><Icono n={ic} color={t.accent} size={19} /></View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.text, fontWeight: '600' }}>{titulo}</Text>
+                <Text style={{ color: t.muted, fontSize: 13 }}>{desc}</Text>
+              </View>
+              <Text style={{ color: t.muted, fontSize: 20 }}>›</Text>
+            </Pressable>
+          ))}
+        </Seccion>
+
         <Seccion titulo="Privacidad">
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <View style={{ flex: 1 }}>

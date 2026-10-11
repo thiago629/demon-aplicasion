@@ -19,7 +19,7 @@ for (const [slug, file] of docs) {
     .replaceAll('[NOMBRE DE LA APP]', marca.nombre)
     .replaceAll('[DOMINIO]', marca.dominio)
     // Los borradores ya traen el nombre anterior; se sustituye por el actual
-    .replaceAll('zavnir.app', marca.dominio).replaceAll('ZAVNIR', marca.nombre.toUpperCase()).replaceAll('Zavnir', marca.nombre);
+    .replaceAll('zavnir.app', marca.dominio).replaceAll('ZAVNIR', marca.nombre).replaceAll('Zavnir', marca.nombre);
 }
 const version = (out.privacidad.match(/Versión ([\d.]+)/) ?? [])[1] ?? '0.1';
 writeFileSync(new URL('../src/lib/legal-textos.ts', import.meta.url),

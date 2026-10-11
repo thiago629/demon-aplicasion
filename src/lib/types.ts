@@ -114,3 +114,30 @@ export type Prediccion = {
   apuestas: { userId: string; opcion: number; puntos: number }[];
   creado: string;
 };
+
+// ---------------------------------------------------------------- Mensajes privados
+export type Mensaje = {
+  id: string;
+  autor: string;
+  texto?: string;
+  rachi?: boolean; // envío de Rachi para mantener la racha del chat
+  creado: string;
+};
+
+export type Chat = {
+  id: string;
+  tipo: 'directo' | 'grupo';
+  nombre?: string; // solo grupos
+  miembros: string[];
+  mensajes: Mensaje[];
+  creado: string;
+};
+
+// ---------------------------------------------------------------- Seguridad de la cuenta
+export type Seguridad = {
+  dosPasos: boolean;
+  llaveAcceso: boolean;
+  alertasInicio: boolean;
+  sesiones: { id: string; dispositivo: string; lugar: string; ultima: string; actual?: boolean }[];
+  actividad: { id: string; evento: string; fecha: string }[];
+};

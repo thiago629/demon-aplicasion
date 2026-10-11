@@ -134,7 +134,7 @@ function TarjetaPrediccion({ p }: { p: Prediccion }) {
         const gana = p.resultado === i, elegida = mia?.opcion === i;
         return (
           <Pressable key={i} disabled={!abierta || !!mia} onPress={() => setError(apostar(p.id, i, cantidad))}
-            style={{ borderRadius: 12, borderWidth: elegida || gana ? 2 : 1, borderColor: gana ? '#2E9E6A' : elegida ? t.accent : t.line, overflow: 'hidden' }}>
+            style={{ borderRadius: 12, borderWidth: elegida || gana ? 2 : 1, borderColor: gana ? t.ok : elegida ? t.accent : t.line, overflow: 'hidden' }}>
             <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`, backgroundColor: t.chip }} />
             <View style={{ flexDirection: 'row', padding: 12, gap: 8 }}>
               <Text style={{ color: t.text, flex: 1, fontWeight: elegida || gana ? '800' : '500' }}>{o}{gana ? '  ✓ Resultado' : ''}{elegida ? `  · tu apuesta (${mia!.puntos})` : ''}</Text>
